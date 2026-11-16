@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+models/
+logs/
+*.dpapi
+*.lnk
+settings*.json
+diagnostics*.json
+.env
+
+native/
