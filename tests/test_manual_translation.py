@@ -210,7 +210,7 @@ class UIRegressionTests(unittest.TestCase):
         self.assertEqual(self.window.record_button.text(), "Record")
         self.assertEqual(self.window.record_clock.text(), "MIC OFF")
         self.window.set_record_state(True, False, True)
-        self.assertEqual(self.window.record_button.text(), "Stop → Translate")
+        self.assertEqual(self.window.record_button.text(), "Stop")
         self.assertTrue(self.window.source_edit.isReadOnly())
         self.window.set_record_state(False, False, True)
         self.window.set_recognized("Correct these words")

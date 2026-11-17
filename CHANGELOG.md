@@ -1,3 +1,12 @@
+# 1.5.0 — 17 November 2026
+
+- Text-focused native HUD: shared 15 pt caption font, stable interim/final geometry, hover/keyboard controls and optional source drawer.
+- Gemini streaming text output with cancellation, bounded first-output/overall deadlines, one bounded transient retry, safe model-specific thinking controls and persistent incomplete-result errors.
+- Explicit microphone streaming for Gemini recognition plus Gemini English translation; stable phrase updates while recording, ordered final phrases, epoch/revision handling and audio-tail preservation on Stop.
+- Saved streaming/appearance options, UI-only smoke mode, paused launcher mode, opt-in timing logs and a summary utility.
+- Backup-based Windows source updater, separate Antigravity installation/testing prompts, staged test guide and validation record.
+- Existing local/Groq paths, live-caption routing, credentials and capture-protection approach retained.
+
 # Changes
 
 ## 1.4.0 — Gemini speech, microphone quality and launcher recovery

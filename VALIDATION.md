@@ -1,3 +1,5 @@
+> Historical 1.4 documentation retained for reference. For the 1.5.0 update, use README.md, UPGRADE.md, TESTING-1.5.md and VALIDATION-1.5.md. Old UI descriptions and prior test counts below do not describe this release.
+
 # Validation record — Meeting HUD 1.4.0
 
 Date: 25 October 2026. Status: **tested release candidate; Windows laptop acceptance pending**.

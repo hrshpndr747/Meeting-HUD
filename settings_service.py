@@ -15,7 +15,10 @@ ENV_NAMES = {"backend": "HUD_BACKEND", "model": "HUD_MODEL", "device": "HUD_DEVI
              "gemini_model": "HUD_GEMINI_MODEL", "ollama_model": "HUD_OLLAMA_MODEL",
              "cloud_enabled": "HUD_CLOUD_ENABLED", "translation_language": "HUD_TRANSLATION_LANGUAGE",
              "transcript_language": "HUD_TRANSCRIPT_LANGUAGE", "microphone": "HUD_MICROPHONE",
-             "noise_suppression": "HUD_NOISE_SUPPRESSION", "initial_prompt": "HUD_INITIAL_PROMPT"}
+             "noise_suppression": "HUD_NOISE_SUPPRESSION", "initial_prompt": "HUD_INITIAL_PROMPT",
+             "translation_streaming": "HUD_TRANSLATION_STREAMING", "translation_fast": "HUD_TRANSLATION_FAST",
+             "dictation_live_model": "HUD_DICTATION_LIVE_MODEL", "caption_font_pt": "HUD_CAPTION_FONT_PT",
+             "caption_lines": "HUD_CAPTION_LINES"}
 
 
 def save_settings(config, payload):
@@ -25,11 +28,14 @@ def save_settings(config, payload):
     if not isinstance(keys, dict) or set(keys) - {"gemini", "groq"}:
         raise ValueError("Unsupported credential fields.")
     parsed = dict(values)
-    for field in ("cloud_enabled", "noise_suppression"):
+    for field in ("cloud_enabled", "noise_suppression", "translation_streaming", "translation_fast"):
         if field in parsed:
             if parsed[field] not in ("0", "1"):
                 raise ValueError("Invalid checkbox preference.")
             parsed[field] = parsed[field] == "1"
+    for field in ("caption_font_pt", "caption_lines"):
+        if field in parsed:
+            parsed[field] = int(parsed[field])
     for field in ("translation_language", "transcript_language"):
         if field in parsed:
             parsed[field] = language(parsed[field])

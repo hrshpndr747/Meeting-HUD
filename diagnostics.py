@@ -65,6 +65,10 @@ def safe_configuration(config: AppConfig) -> dict:
             "max_record_s": config.max_record_s,
             "selected_microphone": config.microphone or "Windows default",
             "noise_suppression": config.noise_suppression,
+            "translation_streaming": config.use_streaming_translation,
+            "translation_fast": config.translation_fast,
+            "dictation_live_model": config.dictation_live_model,
+            "caption_font_pt": config.caption_font_pt, "caption_lines": config.caption_lines,
             "rnnoise_installed": Path(__file__).with_name("native").joinpath("rnnoise.dll").is_file()}
 
 

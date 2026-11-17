@@ -245,6 +245,8 @@ class SpeechWorker(QThread):
     busy = pyqtSignal(bool)
     status = pyqtSignal(str)
     fault = pyqtSignal(str)
+    translation_partial = pyqtSignal(object)
+    recoverable_error = pyqtSignal(int, str)
     recognized = pyqtSignal(object)
     dictation_done = pyqtSignal(int, str)
 
@@ -336,7 +338,12 @@ class SpeechWorker(QThread):
                                 if isinstance(candidate, LocalWhisperBackend):
                                     candidate.release_model()
                         self.status.emit("Translating the recognized words into English…")
-                        text = self._translator.translate(source_text, job.epoch)
+                        if isinstance(self._translator, TextTranslator):
+                            from pipeline import TranslationUpdate
+                            text = self._translator.translate(source_text, job.epoch,
+                                on_partial=lambda text: self.translation_partial.emit(TranslationUpdate(text, job.epoch)))
+                        else:
+                            text = self._translator.translate(source_text, job.epoch)
                     else:
                         text = source_text
                     if not self.state.accepts(job.epoch, job.source) or self._stop_event.is_set():
@@ -363,6 +370,7 @@ class SpeechWorker(QThread):
                     if manual:
                         notice = (str(exc) if isinstance(exc, (TranslationError, FatalBackendError))
                                   else f"Dictation failed ({type(exc).__name__}). Check Settings and try again.")
+                        self.recoverable_error.emit(job.epoch, notice)
                         log.warning("Manual dictation/translation failed: %s", type(exc).__name__)
                     else:
                         if isinstance(exc, FatalBackendError):

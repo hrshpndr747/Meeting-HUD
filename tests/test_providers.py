@@ -93,13 +93,30 @@ class TranslationProviderTests(MockHTTPTest):
     def gemini(self, handler, **kwargs):
         config = AppConfig(text_translator="gemini", gemini_model="gemini-example-flash",
                            gemini_api_key="private-key", cloud_enabled=True)
-        return TextTranslator(replace(config, **kwargs), Event(), self.state, self.client(handler))
+        def stream_handler(request):
+            response = handler(request)
+            if response.status_code == 200 and response.headers.get("content-type", "").startswith("application/json"):
+                return httpx.Response(200, content=("data: " + response.text + "\n\n").encode(), headers={"content-type": "text/event-stream"})
+            return response
+        client = httpx.AsyncClient(transport=httpx.MockTransport(stream_handler))
+        translator = TextTranslator(replace(config, **kwargs), Event(), self.state, stream_client=client)
+        def cleanup():
+            import asyncio
+            if translator._runner is not None:
+                translator._runner.run(client.aclose())
+            else:
+                asyncio.run(client.aclose())
+            translator.close()
+        self.addCleanup(cleanup)
+        return translator
 
     def test_gemini_sends_only_exact_source_text_and_ignores_thought_parts(self):
         requests = []
         def handler(request):
             requests.append(request)
             self.assertEqual(request.url.host, "generativelanguage.googleapis.com")
+            self.assertTrue(request.url.path.endswith(":streamGenerateContent"))
+            self.assertEqual(request.url.params["alt"], "sse")
             self.assertNotIn("private-key", str(request.url))
             self.assertEqual(request.headers["x-goog-api-key"], "private-key")
             body = json.loads(request.read())
@@ -277,11 +294,11 @@ class SettingsTests(unittest.TestCase):
         self.assertGreaterEqual(window.height(), 500)
         window.select_mode(Mode.TRANSLATION)
         APP.processEvents()
-        self.assertEqual(window.height(), 260)
+        self.assertEqual(window.height(), 116)
         window.toggle_settings()
         window.select_mode(Mode.TRANSLATION)
         self.assertFalse(window._settings_open)
-        self.assertEqual(window.height(), 260)
+        self.assertEqual(window.height(), 116)
 
 
 if __name__ == "__main__":

@@ -416,7 +416,7 @@ class AudioTests(unittest.TestCase):
         window.set_partial(LivePartial(1, Source.MIC, "दूसरा"))
         self.assertNotIn("पहला", window.partial_caption.text())
         self.assertIn("दूसरा", window.partial_caption.text())
-        self.assertFalse(window.content.toPlainText())
+        self.assertEqual(window.content.toPlainText(), "दूसरा")
         window.clear_partials()
         self.assertFalse(window.partial_caption.text())
 

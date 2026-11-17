@@ -109,6 +109,13 @@ class RecognizedText:
 
 
 @dataclass(frozen=True)
+class TranslationUpdate:
+    text: str
+    epoch: int
+    final: bool = False
+
+
+@dataclass(frozen=True)
 class TextRequest:
     text: str
     epoch: int

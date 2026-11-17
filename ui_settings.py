@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (QButtonGroup, QCheckBox, QHBoxLayout, QLabel, QLineEdit,
-                             QListWidget, QListWidgetItem, QProgressBar, QPushButton, QVBoxLayout, QWidget)
+                             QListWidget, QListWidgetItem, QSpinBox, QProgressBar, QPushButton, QVBoxLayout, QWidget)
 
 from model_catalog import CatalogRequest, LOCAL_MODELS
 
@@ -157,6 +157,34 @@ class SettingsPanel(QWidget):
         self.glossary.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         mic_layout.addWidget(self.glossary)
         layout.addWidget(self.mic_panel)
+        self.streaming = QCheckBox("Translate while recording · Gemini speech + Gemini text")
+        self.streaming.setChecked(config.translation_streaming)
+        layout.addWidget(self.streaming)
+        self.fast = QCheckBox("Use the lowest supported Gemini thinking setting")
+        self.fast.setChecked(config.translation_fast)
+        layout.addWidget(self.fast)
+        live_row = QHBoxLayout()
+        live_row.addWidget(QLabel("Streaming speech model"))
+        self.live_model = QLineEdit(config.dictation_live_model)
+        self.live_model.setMaxLength(240)
+        self.live_model.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        live_row.addWidget(self.live_model)
+        layout.addLayout(live_row)
+        appearance = QHBoxLayout()
+        appearance.addWidget(QLabel("Caption size (pt)"))
+        self.font_size = QSpinBox()
+        self.font_size.setRange(11, 22)
+        self.font_size.setValue(config.caption_font_pt)
+        appearance.addWidget(self.font_size)
+        appearance.addWidget(QLabel("Visible lines"))
+        self.caption_lines = QSpinBox()
+        self.caption_lines.setRange(2, 3)
+        self.caption_lines.setValue(config.caption_lines)
+        appearance.addWidget(self.caption_lines)
+        for widget in (self.font_size, self.caption_lines):
+            widget.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+            widget.lineEdit().setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        layout.addLayout(appearance)
         self.cloud = QCheckBox("Allow selected cloud services (provider charges/quotas may apply)")
         self.cloud.setChecked(config.cloud_enabled)
         layout.addWidget(self.cloud)
@@ -168,7 +196,7 @@ class SettingsPanel(QWidget):
         save.clicked.connect(self.save)
         layout.addWidget(save)
         self.setStyleSheet("""
-            QLineEdit, QListWidget {background: #242730; border: 1px solid #3A3E4B;
+            QLineEdit, QListWidget, QSpinBox {background: #242730; border: 1px solid #3A3E4B;
                 border-radius: 5px; color: #F2F2F7; padding: 4px;}
             QListWidget::item:selected {background: #294554; color: #64D2FF;}
             QCheckBox {spacing: 6px;}
@@ -283,7 +311,11 @@ class SettingsPanel(QWidget):
                       "device": self.device, "cloud_enabled": "1" if self.cloud.isChecked() else "0",
                       "transcript_language": self.languages["live"], "translation_language": self.languages["dictation"],
                       "microphone": self.microphone, "noise_suppression": "1" if self.noise.isChecked() else "0",
-                      "initial_prompt": self.glossary.text().strip()}
+                      "initial_prompt": self.glossary.text().strip(),
+                      "translation_streaming": "1" if self.streaming.isChecked() else "0",
+                      "translation_fast": "1" if self.fast.isChecked() else "0",
+                      "dictation_live_model": self.live_model.text().strip(),
+                      "caption_font_pt": str(self.font_size.value()), "caption_lines": str(self.caption_lines.value())}
             self.saved.emit({"preferences": values, "keys": dict(self.key_updates)})
         except ValueError as exc:
             self.message.setText(str(exc))

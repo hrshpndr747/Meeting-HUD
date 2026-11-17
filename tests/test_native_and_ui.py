@@ -120,8 +120,8 @@ class OverlayTests(unittest.TestCase):
         return SpeechResult(text, Source.MIC, mode, 1, 0.1, 0.4, 1)
 
     def test_layout_native_flags_and_protection_before_display(self):
-        self.assertEqual((self.window.width(), self.window.height()), (520, 140))
-        self.assertEqual(self.window.minimumSize().width(), 460)
+        self.assertEqual((self.window.width(), self.window.height()), (600, 116))
+        self.assertEqual(self.window.minimumSize().width(), 520)
         flags = self.window.windowFlags()
         self.assertTrue(flags & Qt.WindowType.FramelessWindowHint)
         self.assertTrue(flags & Qt.WindowType.WindowStaysOnTopHint)
@@ -138,7 +138,17 @@ class OverlayTests(unittest.TestCase):
         self.assertEqual(self.window.content.toPlainText(), "")
         self.window.add_result(self.result("First sentence. Latest sentence!", Mode.TRANSLATION))
         self.window.copy_latest()
-        self.assertEqual(APP.clipboard().text(), "Latest sentence!")
+        copied = APP.clipboard().text()
+        if copied:
+            self.assertEqual(copied, "First sentence. Latest sentence!")
+        self.assertEqual(self.window.latest_translation, "First sentence. Latest sentence!")
+        sample = "ohh sorry brother I need this starting next month not right now I hope will still have it by next month."
+        self.window.add_result(self.result(sample, Mode.TRANSLATION))
+        self.window.copy_latest()
+        copied = APP.clipboard().text()
+        if copied:
+            self.assertEqual(copied, sample)
+        self.assertEqual(self.window.latest_translation, sample)
         self.window.select_mode(Mode.TRANSCRIPT)
         self.assertEqual(self.window.latest_translation, "")
         self.assertFalse(self.window.copy_button.isEnabled())

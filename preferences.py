@@ -8,7 +8,8 @@ import tempfile
 ALLOWED = {"backend", "model", "device", "dictation_backend", "text_translator",
            "dictation_model", "ollama_model", "text_model", "gemini_model",
            "cloud_enabled", "transcript_language", "translation_language",
-           "microphone", "noise_suppression", "initial_prompt"}
+           "microphone", "noise_suppression", "initial_prompt", "translation_streaming",
+           "translation_fast", "dictation_live_model", "caption_font_pt", "caption_lines"}
 
 
 def settings_path() -> Path:

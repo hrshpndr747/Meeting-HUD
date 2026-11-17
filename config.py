@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from preferences import read_preferences
 
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.5.0"
 
 
 def language(value: str) -> str | None:
@@ -51,7 +51,22 @@ class AppConfig:
     microphone: str = ""
     noise_suppression: bool = False
 
+    translation_streaming: bool = True
+    translation_fast: bool = True
+    dictation_live_model: str = "gemini-3.5-transcribe-live"
+    caption_font_pt: int = 15
+    caption_lines: int = 2
+
+    @property
+    def use_streaming_translation(self):
+        return self.translation_streaming and self.dictation_backend == "gemini" and self.text_translator == "gemini"
+
     def __post_init__(self) -> None:
+        if not 11 <= self.caption_font_pt <= 22 or self.caption_lines not in (2, 3):
+            raise ValueError("Caption size must be 11–22 pt, with two or three lines.")
+        from gemini_protocol import valid_speech_model
+        if not valid_speech_model(self.dictation_live_model, live=True):
+            raise ValueError("Choose a Gemini transcribe-live model for streaming translation.")
         if self.backend not in ("local", "groq", "gemini"):
             raise ValueError("HUD_BACKEND must be local, groq or gemini.")
         if self.dictation_backend not in ("local", "groq", "gemini") or self.text_translator not in ("groq", "ollama", "gemini"):
@@ -143,5 +158,10 @@ class AppConfig:
             ollama_model=os.getenv("HUD_OLLAMA_MODEL", saved.get("ollama_model", "qwen3:4b-instruct")),
             max_record_s=float(os.getenv("HUD_MAX_RECORD_SECONDS", "60")),
             microphone=os.getenv("HUD_MICROPHONE", saved.get("microphone", "")),
+            translation_streaming=os.getenv("HUD_TRANSLATION_STREAMING", saved.get("translation_streaming", "1")) == "1",
+            translation_fast=os.getenv("HUD_TRANSLATION_FAST", saved.get("translation_fast", "1")) == "1",
+            dictation_live_model=os.getenv("HUD_DICTATION_LIVE_MODEL", saved.get("dictation_live_model", "gemini-3.5-transcribe-live")),
+            caption_font_pt=int(os.getenv("HUD_CAPTION_FONT_PT", saved.get("caption_font_pt", "15"))),
+            caption_lines=int(os.getenv("HUD_CAPTION_LINES", saved.get("caption_lines", "2"))),
             noise_suppression=os.getenv("HUD_NOISE_SUPPRESSION", saved.get("noise_suppression", "0")) == "1",
         )

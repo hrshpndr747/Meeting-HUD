@@ -8,7 +8,7 @@ import sys
 from config import APP_VERSION, AppConfig
 
 
-def launch(config: AppConfig) -> int:
+def launch(config: AppConfig, start_paused=False, smoke_ui=False) -> int:
     import signal
     import time
     from queue import Full, Queue
@@ -22,6 +22,8 @@ def launch(config: AppConfig) -> int:
     from stealth_win32 import ProtectionError
     from ui_overlay import Overlay
     from gemini_live import GeminiLiveWorker, LiveAudioBus
+    from streaming_translation import DictationStreamBus, StreamingTranslationWorker
+    from latency_metrics import metric
     from microphones import MicWorker
     from instance_ipc import InstanceError, RestoreListener
     from pathlib import Path
@@ -31,8 +33,12 @@ def launch(config: AppConfig) -> int:
     app.setApplicationVersion(APP_VERSION)
     app.setQuitOnLastWindowClosed(False)
     state = PipelineState()
+    if start_paused or smoke_ui:
+        state.update(paused=True)
+    metric("application_start", streaming=config.use_streaming_translation)
     chunks = Queue(maxsize=config.queue_size)
     live_bus = LiveAudioBus()
+    stream_bus = DictationStreamBus()
     restore_listener = RestoreListener(Path(__file__).resolve().parent)
     try:
         window = Overlay(config=config)
@@ -55,12 +61,20 @@ def launch(config: AppConfig) -> int:
             self.manual_completed_epoch = -1
             self.paused_before_settings = False
             self.capture = AudioCaptureWorker(config, state, chunks, live_bus)
-            self.dictation = DictationCaptureWorker(config, state, chunks)
+            self.dictation = DictationCaptureWorker(config, state, chunks, stream_bus if config.use_streaming_translation else None)
             self.speech = SpeechWorker(config, state, chunks)
             self.catalog = CatalogWorker()
             self.mic_check = MicWorker()
             self.live_speech = GeminiLiveWorker(config, state, live_bus)
-            self.workers = (self.capture, self.dictation, self.speech, self.catalog, self.mic_check, self.live_speech)
+            self.streaming = StreamingTranslationWorker(config, state, stream_bus)
+            self.workers = (self.streaming, self.capture, self.dictation, self.speech, self.catalog, self.mic_check, self.live_speech)
+            self.streaming.recognized.connect(self.recognized)
+            self.streaming.partial.connect(self.translation_partial)
+            self.streaming.completed.connect(self.dictation_done)
+            self.streaming.error.connect(self.recoverable_error)
+            self.streaming.status.connect(self.notice)
+            self.speech.translation_partial.connect(self.translation_partial)
+            self.speech.recoverable_error.connect(self.recoverable_error)
             self.live_connected = {source: False for source in Source}
             window.settings_editor.microphone_request.connect(self.mic_check.submit)
             window.settings_editor.microphone_cancel.connect(self.mic_check.cancel)
@@ -139,18 +153,25 @@ def launch(config: AppConfig) -> int:
                     return
                 drain(chunks)
                 try:
-                    state.begin_recording()
+                    snapshot = state.begin_recording()
                 except ValueError:
                     self.notice("Speech engine state changed. Wait until it is ready and try again.")
                     return
+                window.clear_error()
+                window.clear_translation()
+                if config.use_streaming_translation:
+                    stream_bus.begin(snapshot.epoch)
+                    self.manual_pending = True
                 self.dictation.request_start()
-                self.notice("Recording · pauses are kept · press Stop & Translate when done")
+                self.notice("Connecting… microphone off until ready" if config.use_streaming_translation else
+                            "Recording · pauses are kept · press Stop when done")
             self.tick()
 
         @pyqtSlot()
         def cancel_manual(self):
             if state.snapshot().mode == Mode.TRANSLATION:
                 state.invalidate()
+                window.clear_error()
                 drain(chunks)
                 self.manual_pending = False
                 self.notice("Cancelled · microphone off")
@@ -180,6 +201,17 @@ def launch(config: AppConfig) -> int:
             if state.accepts(item.epoch, Source.MIC):
                 window.set_recognized(item.text)
 
+        @pyqtSlot(object)
+        def translation_partial(self, item):
+            if not self.closing and state.accepts(item.epoch, Source.MIC):
+                window.set_translation_partial(item)
+                metric("translation_ui_updated", epoch=item.epoch, final=item.final, characters=len(item.text))
+
+        @pyqtSlot(int, str)
+        def recoverable_error(self, epoch, message):
+            if not self.closing and state.accepts(epoch, Source.MIC):
+                window.set_error(message)
+
         @pyqtSlot(int, str)
         def dictation_done(self, epoch, message):
             if state.snapshot().epoch == epoch:
@@ -196,6 +228,7 @@ def launch(config: AppConfig) -> int:
                 self.notice("Enter between 1 and 8,000 characters to translate.")
                 return
             snapshot = state.invalidate()
+            window.clear_error()
             window.clear_translation()
             drain(chunks)
             try:
@@ -275,12 +308,13 @@ def launch(config: AppConfig) -> int:
             self.exit_code = 1
             state.update(paused=True, ready=False)
             drain(chunks)
-            window.set_notice(message)
+            window.set_error(message)
             window.pause_button.setEnabled(False)
             self.capture.request_stop()
             self.dictation.request_stop()
             self.speech.request_stop()
             self.live_speech.request_stop()
+            self.streaming.request_stop()
             self.mic_check.cancel()
             logging.error("%s", message)
 
@@ -322,13 +356,20 @@ def launch(config: AppConfig) -> int:
             working = self.processing or self.manual_pending
             window.set_record_state(snapshot.recording, working, snapshot.ready and not self.failed)
             required = (Source.MIC,) if snapshot.mode == Mode.TRANSLATION else tuple(Source)
+            session = stream_bus.current() if config.use_streaming_translation else None
+            connecting = bool(snapshot.recording and session and session.epoch == snapshot.epoch
+                              and not session.capturing.is_set())
             status = ("ERROR" if self.failed else "PAUSED" if snapshot.paused else
-                      "LOAD" if not snapshot.ready else "REC" if snapshot.recording else "WORK" if working else
+                      "LOAD" if not snapshot.ready else "LINK" if connecting else "REC" if snapshot.recording else "WORK" if working else
                       "IDLE" if snapshot.mode == Mode.TRANSLATION else
                       "AUDIO" if not all(self.connected[s] for s in required) else
                       "LINK" if config.backend == "gemini" and not all(self.live_connected[s] for s in required) else "LIVE")
             window.set_status(status, snapshot.paused)
-            if not self.failed and time.monotonic() >= self.notice_until:
+            if not self.failed and snapshot.mode == Mode.TRANSLATION and snapshot.recording:
+                window.set_notice("Connecting… microphone off" if connecting else "Listening…")
+            elif not self.failed and snapshot.mode == Mode.TRANSLATION and working and time.monotonic() >= self.notice_until:
+                window.set_notice("Translating…")
+            elif not self.failed and time.monotonic() >= self.notice_until:
                 sources = " · ".join(f"{s.value} {'on' if self.connected[s] else 'off'}" for s in required)
                 route = f"{config.dictation_backend} speech → {config.text_translator} English · microphone off"
                 window.set_notice((route if snapshot.mode == Mode.TRANSLATION and not snapshot.recording and not working else self.engine_name) + " · " + (self.metrics or sources))
@@ -342,7 +383,9 @@ def launch(config: AppConfig) -> int:
             signal.signal(getattr(signal, name), lambda *_: controller.shutdown())
     app.aboutToQuit.connect(controller.shutdown)
     window.show()
-    if not controller.closing:
+    if smoke_ui:
+        window.set_notice("UI check · microphone and network workers are off")
+    if not controller.closing and not smoke_ui:
         for worker in controller.workers:
             worker.start()
     code = app.exec()
@@ -362,6 +405,8 @@ def main(argv=None) -> int:
     parser.add_argument("--diagnose", action="store_true", help="Print a JSON setup report without recording audio")
     parser.add_argument("--report", metavar="PATH", help="Also save the --diagnose JSON report to this file")
     parser.add_argument("--check-model", action="store_true", help="With --diagnose, load/warm the local model (may download)")
+    parser.add_argument("--paused", action="store_true", help="Start with capture paused")
+    parser.add_argument("--smoke-ui", action="store_true", help="Open the UI without starting audio, network or model workers")
     args = parser.parse_args(argv)
     if (args.report or args.check_model) and not args.diagnose:
         parser.error("--report and --check-model require --diagnose")
@@ -383,7 +428,7 @@ def main(argv=None) -> int:
     try:
         from runtime_bootstrap import preload_onnx
         preload_onnx()
-        return launch(config)
+        return launch(config, start_paused=args.paused, smoke_ui=args.smoke_ui)
     except ImportError as exc:
         print(f"Missing dependency ({exc.name}); install requirements.txt in this virtual environment.", file=sys.stderr)
         return 2

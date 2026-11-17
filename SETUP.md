@@ -1,3 +1,5 @@
+> Historical 1.4 documentation retained for reference. For the 1.5.0 update, use README.md, UPGRADE.md, TESTING-1.5.md and VALIDATION-1.5.md. Old UI descriptions and prior test counts below do not describe this release.
+
 # Windows setup and model selection
 
 Target: Windows 11 x64, Ryzen 7 7840HS, 16 GB RAM, RTX 3050 Laptop GPU with 6 GB VRAM. Windows 10 build 19041+ is the API minimum. This release was developed/tested on Linux with simulated native devices; perform TEST_GUIDE.md on the actual laptop.

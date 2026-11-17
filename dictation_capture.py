@@ -8,11 +8,13 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from noise_suppression import NoiseError, make_resampler
 from microphones import MIC_LEASE, MicrophoneError, resolve_microphone
 from config import AppConfig
+from latency_metrics import metric
 from pipeline import AudioChunk, Mode, PipelineState, SAMPLE_RATE, Source
 
 
 class UtteranceBuffer:
-    def __init__(self, rate: int, channels: int, maximum_s: float, floor: float, noise=False):
+    def __init__(self, rate: int, channels: int, maximum_s: float, floor: float, noise=False, on_samples=None):
+        self.on_samples = on_samples
         self.resampler = make_resampler(rate, channels, noise)
         self.limit = round(maximum_s * SAMPLE_RATE)
         self.floor = floor
@@ -35,6 +37,8 @@ class UtteranceBuffer:
         if rms >= self.floor:
             self.voiced_samples += len(samples)
             self.speech_end = captured_at
+        if self.on_samples:
+            self.on_samples(samples, captured_at)
         return min(1.0, rms * 12)
 
     def feed(self, data: bytes, captured_at: float) -> float:
@@ -53,10 +57,11 @@ class DictationCaptureWorker(QThread):
     level = pyqtSignal(int, float)
     finished_recording = pyqtSignal(int, bool, str)
 
-    def __init__(self, config: AppConfig, state: PipelineState, jobs: Queue):
+    def __init__(self, config: AppConfig, state: PipelineState, jobs: Queue, stream_bus=None):
         super().__init__()
         self.setObjectName("explicit-microphone-capture")
         self.config, self.state, self.jobs = config, state, jobs
+        self.stream_bus = stream_bus
         self._stop_event, self._wake = Event(), Event()
 
     def request_start(self) -> None:
@@ -72,6 +77,9 @@ class DictationCaptureWorker(QThread):
                 and snapshot.mode == Mode.TRANSLATION and snapshot.accepts(Source.MIC))
 
     def _record(self, epoch: int) -> None:
+        session = self.stream_bus.current() if self.stream_bus else None
+        if session is not None and session.epoch != epoch:
+            return
         pa = stream = None
         mic_locked = False
         raw = Queue(maxsize=150)
@@ -81,6 +89,17 @@ class DictationCaptureWorker(QThread):
         last_frame = time.monotonic()
         message, submitted = "Recording cancelled.", False
         try:
+            if session:
+                deadline = time.monotonic() + 18
+                while not session.ready.wait(.03):
+                    if not self._current(epoch) or not self.state.snapshot().recording:
+                        return
+                    if time.monotonic() >= deadline:
+                        raise MicrophoneError("Recognition connection timed out; microphone was not opened.")
+                if session.error:
+                    raise MicrophoneError(session.error)
+                if not self._current(epoch) or not self.state.snapshot().recording:
+                    return
             import pyaudiowpatch as pyaudio
             deadline = time.monotonic() + 3
             while self._current(epoch) and time.monotonic() < deadline:
@@ -94,7 +113,8 @@ class DictationCaptureWorker(QThread):
             index = int(device["index"])
             rate, channels = round(device["defaultSampleRate"]), int(device["maxInputChannels"])
             buffer = UtteranceBuffer(rate, channels, self.config.max_record_s, self.config.energy_floor,
-                                     self.config.noise_suppression)
+                                     self.config.noise_suppression,
+                                     on_samples=session.publish if session else None)
 
             def callback(data, frame_count, timing, status):
                 snapshot = self.state.snapshot()
@@ -111,6 +131,9 @@ class DictationCaptureWorker(QThread):
                              input=True, input_device_index=index, frames_per_buffer=round(rate * .02),
                              stream_callback=callback)
             started, last_meter = time.monotonic(), 0.0
+            if session:
+                session.capturing.set()
+            metric("capture_started", epoch=epoch, streaming=bool(session))
             last_frame = started
             while self._current(epoch) and self.state.snapshot().recording:
                 if damaged.is_set():
@@ -174,6 +197,10 @@ class DictationCaptureWorker(QThread):
             self.finished_recording.emit(epoch, submitted, message)
             # Publish only after capture cleanup/completion. Fast inference must never
             # finish before a delayed recording_finished resurrects the pending state.
+            if session:
+                session.finish(buffer.speech_end if buffer else 0., '' if submitted else message)
+                metric("capture_stopped", epoch=epoch, samples=buffer.count if buffer else 0)
+                return
             if submitted:
                 try:
                     self.jobs.put_nowait(job)

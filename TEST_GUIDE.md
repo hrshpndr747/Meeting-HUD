@@ -1,3 +1,5 @@
+> Historical 1.4 documentation retained for reference. For the 1.5.0 update, use README.md, UPGRADE.md, TESTING-1.5.md and VALIDATION-1.5.md. Old UI descriptions and prior test counts below do not describe this release.
+
 # Laptop acceptance tests
 
 Use the new shortcut and a headset. These tests require your actual Windows machine; the portable suite cannot establish speech accuracy, GPU latency or capture exclusion.

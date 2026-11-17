@@ -1,3 +1,5 @@
+> Historical 1.4 documentation retained for reference. For the 1.5.0 update, use README.md, UPGRADE.md, TESTING-1.5.md and VALIDATION-1.5.md. Old UI descriptions and prior test counts below do not describe this release.
+
 # Meeting HUD — Comprehensive Bugs & Issues Resolution Report
 
 This document details all technical issues, runtime failures, architectural bugs, and integration defects encountered in **Meeting HUD**, along with their root causes, implementation details, and verification steps.

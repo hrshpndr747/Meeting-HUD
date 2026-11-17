@@ -1,0 +1,314 @@
+{
+  "version": "1.5.0",
+  "created": "2026-11-17",
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "0f7d5b1ac3e0add73dbb3c9a23ba8adfa5cb1b7430a75be35e6f03b1c3987217"
+    },
+    {
+      "path": "ANTIGRAVITY-INSTALL-PROMPT.md",
+      "sha256": "ba33c3d2a5b84eb3ef0d5ecf8372e3b6f4d8d10034b4f1165cc1c884a5775e9a"
+    },
+    {
+      "path": "ANTIGRAVITY-TEST-PROMPT.md",
+      "sha256": "4d63474e63d95879db51112a41244918b42b28b891850a06485135e7f5c32a08"
+    },
+    {
+      "path": "BUGS_AND_FIXES.md",
+      "sha256": "e87154b0b8e2b4daad702df5105ca7b798987570cb1bccb17ab5a4f618950e1d"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "cd38686d7241420e3f70bbaed10333ad51fb48b9f7bf4771463a19f95095ae7e"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "path": "Launch_HUD.vbs",
+      "sha256": "a7881df69efabd1aae57aa7ea9ad27dc531518b8e4828ba7882fcf97aea19276"
+    },
+    {
+      "path": "README.md",
+      "sha256": "250103675db033f3d07edfcedd75681cb777a8a7fff10e55c4b6430dbde43b3c"
+    },
+    {
+      "path": "REVIEW.md",
+      "sha256": "c0b763710cc491902fc865fd610e39ac0d37bc4dd0d15185001b88ca64296e48"
+    },
+    {
+      "path": "RNNOISE_LICENSE.txt",
+      "sha256": "e2f59ff41d9d03adc3dcf3deff170f8c8cf4a6eb4a9b174762a7656d23200ffa"
+    },
+    {
+      "path": "SETUP.md",
+      "sha256": "ade6b9fe9277cd93ebe29e2ad0451141891f746dc8f22ac29aba357847a286ce"
+    },
+    {
+      "path": "TESTING-1.5.md",
+      "sha256": "0136605eef3002a5f287cee00f8fece888dc48b1db919310ac6271e6fc464e5b"
+    },
+    {
+      "path": "TEST_GUIDE.md",
+      "sha256": "e22740bb6794989a3dda30fdfd432d3826616cb6eb408487e357b940eb32bd20"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "54aab9fee785233e73c92910a28e5ba2f6e8369b4f94541f9313503e59a1ab42"
+    },
+    {
+      "path": "UPGRADE.md",
+      "sha256": "8132334d2c675a070d5b07085a6cbee67b61d576942bed7ceca18ccb646aadd0"
+    },
+    {
+      "path": "Update-MeetingHUD.ps1",
+      "sha256": "a84877e2714087f024ee1857e3e00263f85d1bca6fb8ffba5967f4fa19f8de0a"
+    },
+    {
+      "path": "VALIDATION-1.5.md",
+      "sha256": "cf8125cdd4d2669ef3451b3731eec324fa9aa92f62738f2f4f3715d77be5d07d"
+    },
+    {
+      "path": "VALIDATION.md",
+      "sha256": "0ee43e2cbeaf9eddbd68aa00929b78482fe27a8ddcbcdc1ca68c77ad2663f36f"
+    },
+    {
+      "path": "app_logging.py",
+      "sha256": "e96d74863ebd47ab991cd173d956fd79b8600e521d22aab4e45161f52c8f502a"
+    },
+    {
+      "path": "audio_capture.py",
+      "sha256": "01bedad07de2ef24a3b669f3359ffd15f957db079d02961016da37bfe3f2717c"
+    },
+    {
+      "path": "audio_dsp.py",
+      "sha256": "df2266a10471084585ba822242b3b31fa30320add9bf1e56c8a679022e3983e1"
+    },
+    {
+      "path": "config.py",
+      "sha256": "f52cc6e769a00c5dc292d3b380adfefbdb124c5e7f31afbf38b7aed3cea84f39"
+    },
+    {
+      "path": "create_shortcut.ps1",
+      "sha256": "e031dc2ceb3ff36992fc09a0ca854ef261ff87586cc3ca7c37e5f0f369a45ff2"
+    },
+    {
+      "path": "credentials.py",
+      "sha256": "3e33d54c280062c2b87709eaf80b38ad629a2517e8de294a61ac2321a248d385"
+    },
+    {
+      "path": "cuda_runtime.py",
+      "sha256": "d65f72e8ae72740133c4952ef32c4f50ce25548bf10147f127fcb27a15c14901"
+    },
+    {
+      "path": "diagnostics.py",
+      "sha256": "979c7c369fb91fabda6e3b667cacd64aec36e3ea54ddedd4b16a3e77466c12c2"
+    },
+    {
+      "path": "dictation_capture.py",
+      "sha256": "e0fc0cf599b2b9fde5e02cb99fa741f778db32b645e95bcbed9b53efbefbdbf8"
+    },
+    {
+      "path": "gemini_live.py",
+      "sha256": "f5a7bd763775f0822d35f68581a4ab5ba9311e2fc51b98b69803d85f3a0c683b"
+    },
+    {
+      "path": "gemini_protocol.py",
+      "sha256": "c94e2a788c72c8bd8c8fb174a7c952e03088fd28049f14959a7f1971825e4575"
+    },
+    {
+      "path": "gemini_speech.py",
+      "sha256": "e6e7358e16febae516ce9f292c75e7b60d177e0feae82a663f41fb21b33db3ad"
+    },
+    {
+      "path": "gemini_translation.py",
+      "sha256": "34379b6cee6450f99a479ca99136828b61e59069b4b9db728c9b337258c78160"
+    },
+    {
+      "path": "install_noise.py",
+      "sha256": "f8524b1865f6268f03614e1e25e352e318149ad78dbd23610f0d38eccca6dbed"
+    },
+    {
+      "path": "instance_ipc.py",
+      "sha256": "0f081626bb66700e245daee68eb25983e4c5fce87901c58ccd11daf34381c4df"
+    },
+    {
+      "path": "latency_metrics.py",
+      "sha256": "7759e008d5182fd46761087005ecc5546b423bfc03d0b8d460b27c753d49a248"
+    },
+    {
+      "path": "launcher.pyw",
+      "sha256": "6dbc6df34892f760aee917d4b7c7224478b3431982bcf145c7709bc6fb6f115b"
+    },
+    {
+      "path": "main.py",
+      "sha256": "300a5220b928628d48f55d04f14bffea6eba157ca32792222e3e2c922871f9a1"
+    },
+    {
+      "path": "microphones.py",
+      "sha256": "0b4bced18d347236d88d8e62907ee14cc270cce5349a8394a549fa83efb20da5"
+    },
+    {
+      "path": "model_catalog.py",
+      "sha256": "4b3c8798f9e172d3966755dcf3857cda2ae6771af3d371259b2503f4f21f3607"
+    },
+    {
+      "path": "network_io.py",
+      "sha256": "2959b1ab4854d41c0c51059f50b7a84b7969b512aaa058645e3efef579b59a82"
+    },
+    {
+      "path": "noise_suppression.py",
+      "sha256": "f160014549fd5e82860564002fcafb6856c545f5fdb0e644a068660b5969a398"
+    },
+    {
+      "path": "pipeline.py",
+      "sha256": "912004a455793e6d8d921bb42714b4032630a0a5825a8f8f40fa4ad241238a69"
+    },
+    {
+      "path": "preferences.py",
+      "sha256": "1030819c4b2193610edf4710932f5f46acce01e8411dc3949b147ba2e35431ec"
+    },
+    {
+      "path": "prepare_models.bat",
+      "sha256": "1437529e7f2cb01f653e0a7e703ca1e9354afaeb432857f14940320feed793e5"
+    },
+    {
+      "path": "prepare_models.py",
+      "sha256": "962359052d6988f76b2b59077f30c5183b71a6453c95532f19471b832746e1ba"
+    },
+    {
+      "path": "requirements-gpu.txt",
+      "sha256": "5a7c52e949f2187b6a05f1841e195d7b698080e0c7302989c325128ecb41491d"
+    },
+    {
+      "path": "requirements-torch-optional.txt",
+      "sha256": "7a09d1bb8b4cedbad76edb8936a69fca00c9eb306edb01c4a934df0edef2c713"
+    },
+    {
+      "path": "requirements.in",
+      "sha256": "15e6041f5bd9ea441b68d9cce3e1fedb6d6a7b2c426be864e904130054e1b50a"
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "b6c47c948a86e141117dbf5ebabf595696bac7f09cb4b482188476a709f0df87"
+    },
+    {
+      "path": "run.bat",
+      "sha256": "6e3ddf20dd21e4261edc25a6cfcda54d733257a7cca181137ef895daa1e4e0c1"
+    },
+    {
+      "path": "run_debug.bat",
+      "sha256": "e191000ed5c35a0f620432df46aa7fb00ce153129b617c7ff60cbc69b6e298c0"
+    },
+    {
+      "path": "run_latency.bat",
+      "sha256": "6a0c16665dba84097e7da68db82a38ee0e39dc4bf214375bbdc08855c7de2907"
+    },
+    {
+      "path": "runtime_bootstrap.py",
+      "sha256": "ff66810aa6fca8489a0b0f140d25be1e1d3343e2a22ae12556c028f8547457e5"
+    },
+    {
+      "path": "settings_service.py",
+      "sha256": "5788ba9cb374b4110ed02350428e7950df5b7f071d47cffdbed06d7e3f142228"
+    },
+    {
+      "path": "setup.bat",
+      "sha256": "30d4c035830c111f2ab67fff6b28aeae2195788680ce775d5d645b41121c1475"
+    },
+    {
+      "path": "setup_noise.bat",
+      "sha256": "2e1237fa6b2f601aaec0fb57fad6f28bd1bf462c1e52fc32d5a773bff7c0fb3a"
+    },
+    {
+      "path": "speech_engine.py",
+      "sha256": "8f035c7995b2e3e343a49f23ccac2e3c72f58064a10453fe96db4228a7e4bda1"
+    },
+    {
+      "path": "stealth_win32.py",
+      "sha256": "9847af4ede11fe5b1ece0c075c2aaa7259e48cd838773859ca75522059b99ea7"
+    },
+    {
+      "path": "streaming_translation.py",
+      "sha256": "c321094585adb98d814e982a5f33140b67f9dc675b6814153cebe6cb0b5f7e5d"
+    },
+    {
+      "path": "summarize_latency.py",
+      "sha256": "0f18061773709d6fef2d6d9feda172cacbd83a54f99dd71882fbe4733fd7bc3a"
+    },
+    {
+      "path": "tests/support.py",
+      "sha256": "b39bec93813b83f16125043d106a78956565f71926eb9486d5f9d0ddb3de66c4"
+    },
+    {
+      "path": "tests/test_capture.py",
+      "sha256": "e41c94e1b54f1f86fbe338610653c1da9ad677be9ab70a139a7bf9cd97a89148"
+    },
+    {
+      "path": "tests/test_cuda_runtime.py",
+      "sha256": "dbe3e5bffd9d8a6c04737f3cf0637786405070011ba3a42ec1ebb086b1d36c8d"
+    },
+    {
+      "path": "tests/test_diagnostics.py",
+      "sha256": "428691a567fcbbfcac3e56e49f9e7d72651cec0c90a350c9cdb4384d7e0a1957"
+    },
+    {
+      "path": "tests/test_dsp.py",
+      "sha256": "ba8e7a9601e3fc181cbe51bcb2d6724fd88fdf53c2d1ac607855ab1cbc700fe5"
+    },
+    {
+      "path": "tests/test_instance_ipc.py",
+      "sha256": "25772d8844b55c521dd4c531d27b37afab6f19efa4319fe8c1a8ea1a0e9334e6"
+    },
+    {
+      "path": "tests/test_manual_translation.py",
+      "sha256": "c25501e649c67e5094b3056454f6d8f12b237a5bd76f5fe6149977dc11a41ced"
+    },
+    {
+      "path": "tests/test_native_and_ui.py",
+      "sha256": "33c72cef9dbe697605de2b9e4bc1480c54d8421e8fdc41dd66ff669122456c98"
+    },
+    {
+      "path": "tests/test_pipeline.py",
+      "sha256": "7c023cdfa4a21b21c7fcd346408bd8450f1d7b6b70babcd15711c6b3d264d421"
+    },
+    {
+      "path": "tests/test_providers.py",
+      "sha256": "fd6ff8ac8597112c210a36dbe94630378b6b8a47ef1b3a17d7980d846d8e6c6c"
+    },
+    {
+      "path": "tests/test_review_regressions.py",
+      "sha256": "a473214a65dfd5d3f228b686cf9994b1aef3c0ab1b408ed31ffafa14f1a725a8"
+    },
+    {
+      "path": "tests/test_speech.py",
+      "sha256": "8162278ad566b7cd4cd81bfe2a653e40f18d34fa76c68e97cc66cb11597805bb"
+    },
+    {
+      "path": "tests/test_streaming_translation.py",
+      "sha256": "e98e5c3d1284f86c6554d0f277af53d3eaea5505d30393109db318f8614678e4"
+    },
+    {
+      "path": "tests/test_v14_audio.py",
+      "sha256": "86456a63f6a76ee2cf2f604fe8587ce751ea8675adef675bc5dc46446f916d43"
+    },
+    {
+      "path": "text_translation.py",
+      "sha256": "1d8788343e31639ddb054988a78be0b42b04eb501ca03ac774ae9d9785ed3dec"
+    },
+    {
+      "path": "ui_overlay.py",
+      "sha256": "534a3c64c5d911fd53cb03a6ae42db73e1144ec698292046f70f7faf3b407ba0"
+    },
+    {
+      "path": "ui_settings.py",
+      "sha256": "916745a5b49e5d086bd2911e3024a7fa81405d49bff293752eef843f6ffe936a"
+    },
+    {
+      "path": "win32_audio.py",
+      "sha256": "e7bfb51972d458ae419aa96a410203ecc976aef9437b991603b9a9b59ed2dbfa"
+    }
+  ]
+}

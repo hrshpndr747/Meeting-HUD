@@ -1,63 +1,61 @@
-# Meeting HUD 1.4.0
+# Meeting HUD 1.5.0
 
-A minimal Windows HUD with exactly two working modes: **Live Transcript** and **Translation**. Models are selected independently in the gear/settings panel. The default route runs locally and has no API fee or subscription.
+A compact Windows desktop overlay for live captions and English translation. This release implements the approved text-focused HUD and Gemini streaming translation workflow.
 
-## Start here
+## Update an existing installation
 
-1. Extract into a fresh, writable folder. Install Python 3.11 x64 and the x64 Microsoft Visual C++ Redistributable.
-2. Run `setup.bat`. It installs the pinned application/GPU packages and creates `Meeting HUD.lnk` for this folder.
-3. For completely local translation, install [Ollama](https://ollama.com/download/windows), then run `ollama pull qwen3:4b-instruct` once.
-4. Double-click **Meeting HUD.lnk**. `Launch_HUD.vbs` is an alternative where Windows Script Host is enabled. Neither keeps a CMD window open.
-5. Open Settings to choose your models. Read [SETUP.md](SETUP.md) for prerequisites, upgrades and troubleshooting.
+Read **UPGRADE.md** and use **ANTIGRAVITY-INSTALL-PROMPT.md**. Extract this release separately and let the supplied updater back up and update the existing source installation. Keep its virtual environment, downloaded models, saved settings, encrypted API keys and shortcut. This ZIP is source code, not a standalone EXE.
 
-## Choose models independently
+After installation, use **ANTIGRAVITY-TEST-PROMPT.md** with **TESTING-1.5.md**. **VALIDATION-1.5.md** states what was actually tested before delivery and what still requires the Windows laptop.
 
-| Stage | Available providers | Default |
-| --- | --- | --- |
-| Live Transcript | Local Whisper, Groq Whisper or Gemini streaming ASR | Local `small` |
-| Recognize my speech | Local Whisper, Groq Whisper or Gemini audio ASR | Local `large-v3` |
-| English translation | Local Ollama, Gemini API or Groq API | Ollama `qwen3:4b-instruct` |
+## Text-focused display
 
-Your requested combination is supported: **local `large-v2` for live captions + local Whisper recognition + Gemini for English translation**. In Settings, select English translation → Gemini API, enter a key, click Load models, and choose a returned model. Enable cloud services only if you want those requests. Save and restart applies the choices.
+The default HUD is 600 × 116 logical pixels with a shared 15 pt Segoe UI caption font. Interim and completed captions use the same renderer and font; speech pauses do not change text size or window height. Live captions are off-white; English is light cyan. Long text advances within the bounded caption area. The default minimum width is 520 pixels to keep revealed controls usable.
 
-Entering a key alone does not enable cloud processing. Model discovery lists provider-returned candidates; it does not grant model access, guarantee free usage, or change your billing account. There is no automatic cloud fallback. Selecting Gemini/Groq for speech sends audio. Selecting them only for English translation sends recognized text. Cloud quota, pricing and data handling belong to the provider.
+Controls appear on pointer hover, keyboard use, source review, Settings or an error. Their space is reserved so hover does not shift captions. Drag the caption area to move the HUD; use its corner grip while controls are shown to resize it. Settings includes 11–22 pt text and two/three visible lines. Source text appears only when you choose Review source. Errors stay visible until cleared by a new action; full details are available in Settings and accessibility text.
 
-## New in 1.4
+## English translation
 
-- Gemini appears under **Live Transcript**, **Recognize my speech**, and **English translation**, each with a compatible model list. Live uses a dedicated `transcribe-live` model; dictation uses Gemini Transcribe or an audio-capable Flash/Pro model. Current defaults are selection suggestions, not guaranteed account access.
-- **Select mic** and **Test 5 sec** identify quiet/clipping inputs before recognition. Selection follows a device name across index changes; missing or duplicate names fail explicitly.
-- Optional local RNNoise suppression processes only the microphone. Run `setup_noise.bat` once, then enable the checkbox and compare the mic test. It defaults off. No noise filter can reliably recover speech masked by louder speech/noise.
-- Settings handles missing Windows home lookup safely. A second shortcut launch restores the current HUD; a restore requested during startup or Settings restart remains queued. Separate Windows desktops have separate instance identities.
-- `prepare_models.bat` downloads only your selected local models before a meeting. It does not bundle a virtual environment or model weights into the ZIP.
+When both dictation recognition and English text generation use Gemini and **Translate while recording** is enabled:
 
-## Use the two modes
+1. Select English and press Record. The app connects to Gemini live recognition before opening the microphone.
+2. Wait for Listening, then speak. Stable phrases are translated while recording continues; user-visible English streams into the HUD. Drafts may change when later words clarify the source.
+3. Press Stop to flush the audio tail, finalize recognition and complete the remaining English. Copy becomes available when the translation completes.
+4. Use Review source to inspect/edit recognition and Translate text to retry. A timeout or truncated stream retains source and any partial English, shows an error, and does not mark the draft complete.
 
-- **Live Transcript:** captures the default Windows WASAPI speaker loopback and your selected microphone. Completed phrases appear continuously, labelled MEETING or YOU. Gemini streaming also shows an interim caption that is replaced as recognition improves. Pause closes capture streams. Audio is not archived.
-- **Translation:** microphone is off until you click **Record**. Speak through pauses, then click **Stop → Translate**. The complete utterance is recognized first; those words appear in an editable box; English follows in cyan. Correct a word and click **Translate text** to retry without recording again. Cancel discards pending results. A recording has a 60-second safety limit by default.
+Default streaming speech model: `gemini-3.5-transcribe-live`. The selected Gemini text model remains your existing choice. Account access must be verified on the laptop. Model-specific thinking controls request the lowest supported setting for known families; unrecognized models retain their default. Disable the fast-thinking option to compare quality/latency against defaults.
 
-Copy copies the latest English sentence. Minimize hides the HUD to its tray icon; click the icon, double-click the application shortcut again, or press **Ctrl+Shift+H** to restore. Hiding during a recording cancels that recording. Hiding Live Transcript leaves live capture running. Opening Settings pauses capture and invalidates pending work. The close icon stops the app cooperatively.
+Cloud access remains explicit, with saved keys encrypted for the Windows account. Local/Groq stages or streaming disabled retain the existing record-then-translate workflow. Gemini text generation also streams in that workflow and for edited source text. No automatic provider switch is introduced. The original live-caption route remains separate.
 
-The live HUD defaults to 520 × 140 logical pixels. Translation expands to fit source and English. Settings stays inside the same protected window and returns to the previous size when closed. Drag the background to move; use the bottom-right resize grip.
+Streaming removes avoidable waiting before the first English words; it does not promise instant complete sentences. Network, provider load, model/account access, speech ambiguity and source corrections affect observed speed and accuracy. Phrase updates may use more requests/tokens than one full-recording translation.
 
-## Quality and practical limits
+## Launch and controls
 
-Whisper `large-v3` with a complete utterance and a separate text translator is the accuracy-oriented local route. `large-v2` is also available. Start with `small` for live captions if latency matters: a larger model on the RTX 3050 may drop more old live chunks when it falls behind. All-local dictation releases Whisper before Ollama and unloads Ollama after its response to avoid intentionally holding both models on the 6 GB GPU. This introduces model-loading delay between recordings. Actual quality and speed need measurement on your speech; ChatGPT/Gemini parity is not promised.
+Use your existing shortcut or `Launch_HUD.vbs` after updating. `launcher.pyw` supervises restarts. `--paused` starts with capture paused. `main.py --smoke-ui` opens only the UI for installation checks; it starts no capture, network or model workers.
 
-Local/Groq live captions use 0.8–3.0 second chunks and bounded queues. Gemini live ASR streams 100 ms PCM frames over separate mic/system connections, with interim and final captions. Interrupted/expired connections reconnect without replaying stale audio; notices disclose possible gaps. This is not a complete meeting archive. Local CPU fallback is automatic and visibly reported. No echo cancellation, speaker diarization, answer generation, interview features or meeting recording is included.
+| Action | Shortcut / control |
+| --- | --- |
+| Live captions | Ctrl+1 / Live |
+| English mode | Ctrl+2 / English |
+| Record or Stop | Ctrl+R / Record or Stop |
+| Cancel current English work | Escape / Cancel |
+| Review/edit source | Ctrl+E / Review source |
+| Settings | Ctrl+, / settings icon |
+| Hide/restore globally | Ctrl+Shift+H / tray icon |
 
-## Capture exclusion
+The local shortcuts require the HUD to have keyboard focus. Microphone capture in English mode requires Record. Opening Settings, cancelling or switching mode invalidates old work. Minimize stops an active recording; normal live-caption visibility behavior remains unchanged.
 
-The main HWND receives `WDA_EXCLUDEFROMCAPTURE` (`0x11`) before first display, with return-value/readback verification, DWM checks and periodic rechecking. A failed check hides the HUD. Settings, model lists and masked key fields are child widgets in that window; there are no separate settings dialogs, tooltips or dropdown popups.
+## Diagnostics and development
 
-**This is not a universal 100% invisibility guarantee.** Microsoft describes display affinity as protection for supported OS capture paths, not a security boundary. Test Snipping Tool and each actual Teams/Zoom/Meet/OBS capture mode on your machine. See [TEST_GUIDE.md](TEST_GUIDE.md).
+```powershell
+.\.venv\Scripts\python.exe main.py --version
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe main.py --diagnose --report logs\diagnostics.json
+```
 
-## Contents and validation
+The original dependency lock targets Windows x64/Python 3.11 and is unchanged. Original first-time setup instructions remain in `SETUP.md`; prefer the update guide for an existing installation. Do not add `--check-model` to a no-network installation check because it may load/download local models.
 
-- [SETUP.md](SETUP.md): complete Windows setup, model/API settings, offline use and startup recovery.
-- [REVIEW.md](REVIEW.md): Builder/Critic iterations, defects found and remaining evidence gaps.
-- [VALIDATION.md](VALIDATION.md): automated results and target-machine tests not performed here.
-- [TEST_GUIDE.md](TEST_GUIDE.md): repeatable acceptance tests, including accuracy and capture exclusion.
-- [CHANGELOG.md](CHANGELOG.md): changes from the uploaded branch.
-- `tests/`: portable regression tests using real Qt worker threads, simulated devices/models and mocked provider responses.
+For the later real test phase, `run_latency.bat` enables bounded metadata-only timing logs. `summarize_latency.py --logs logs --out logs\latency-summary.json` reports request timing quantiles and event counts. It does not infer semantic accuracy or exact physical audio-to-screen latency. See the test guide for interpretation.
 
-The application source is GPL-3.0-or-later; see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The Windows/NVIDIA stack and optional provider services have their own terms. Original application code is provided in full; models and external runtimes are downloaded separately.
+Capture exclusion remains implemented with the original protected-parent-window approach, including inline settings and no native tooltips. Native Windows protection and driver behavior must be verified on the target laptop.

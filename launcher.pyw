@@ -3,6 +3,7 @@ import ctypes
 from ctypes import wintypes
 from pathlib import Path
 import subprocess
+import sys
 
 from instance_ipc import SupervisorInstance
 
@@ -14,7 +15,9 @@ def show_error(message):
     user.MessageBoxW(None, message, "Meeting HUD", 0x10)
 
 
-def launch():
+def launch(argv=()):
+    if any(arg not in ("--paused", "--smoke-ui") for arg in argv):
+        raise ValueError("Unsupported launcher argument")
     root = Path(__file__).resolve().parent
     interpreter = root / ".venv" / "Scripts" / "pythonw.exe"
     with SupervisorInstance(root) as instance:
@@ -31,7 +34,7 @@ def launch():
             path.replace(logs / "launcher.previous.log")
         with path.open("a", encoding="utf-8") as output:
             while True:
-                result = subprocess.run([str(interpreter), str(root / "main.py")], cwd=root,
+                result = subprocess.run([str(interpreter), str(root / "main.py"), *argv], cwd=root,
                                         stdin=subprocess.DEVNULL, stdout=output, stderr=subprocess.STDOUT,
                                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
                 if result.returncode != 75:
@@ -43,7 +46,7 @@ def launch():
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(launch())
+        raise SystemExit(launch(sys.argv[1:]))
     except Exception as exc:
         show_error(f"Could not launch Meeting HUD ({type(exc).__name__}). Extract it to a writable folder and run setup.bat.")
         raise SystemExit(2)

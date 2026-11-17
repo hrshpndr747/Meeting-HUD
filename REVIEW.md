@@ -1,3 +1,5 @@
+> Historical 1.4 documentation retained for reference. For the 1.5.0 update, use README.md, UPGRADE.md, TESTING-1.5.md and VALIDATION-1.5.md. Old UI descriptions and prior test counts below do not describe this release.
+
 # Builder / Critic review — 1.4.0
 
 Scope: retain two HUD modes while adding Gemini audio recognition and live ASR, better microphone controls, optional noise processing, and the supplied Anti-Gravity startup/recovery fixes. Local defaults remain free of API charges.
